@@ -15,11 +15,15 @@ import android.widget.Toast;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PopupDialogFragment.CheckStatusListener{
 
     private Button btnScan;
-    boolean mIsStateAlreadySaved = false;
-    boolean mPendingShowDialog = false;
+    private boolean mIsStateAlreadySaved = false;
+    private boolean mPendingShowDialog = false;
+    private boolean isQRValid = true;
+    private int scanQRStatus = 2; // 1= check-in, 2 = checkout
+    private String qrScanMessage = "Car = Swift Desire, No = UP3250101";
+    //private String qrScanMessage = "QR Code might be expired or already used or wrong QR Code scanned. Please scan correct QR Code.";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                 // if valid then check is qr expired or not
                 // if qr is ok show dialog with necessary details like car no, model, verified tag,
                 // show buttons check in / check out depending on status code.
-                showPopup(2);
+                showPopup();
                 // once check in or check out update the status code in db.
 
                 //Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
@@ -72,12 +76,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showPopup(int statusCode) {
+    private void showPopup() {
+
+        Bundle args = new Bundle();
+        args.putBoolean(ParkingConstants.IS_QR_VALID, isQRValid);
+        args.putInt(ParkingConstants.SCAN_QR_STATUS, scanQRStatus);
+        args.putString(ParkingConstants.QR_STATUS_MESSAGE, qrScanMessage);
+
         if(mIsStateAlreadySaved){
             mPendingShowDialog = true;
         }else {
+
             DialogFragment dialog = new PopupDialogFragment();
-            dialog.show(getSupportFragmentManager(), "Hi");
+            dialog.setArguments(args);
+            dialog.show(getSupportFragmentManager(), ParkingConstants.TAG_SCAN_STATUS_DIALOG);
         }
     }
 
@@ -87,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         mIsStateAlreadySaved = false;
         if(mPendingShowDialog){
             mPendingShowDialog = false;
-            showPopup(3);
+            showPopup();
         }
     }
 
@@ -97,4 +109,8 @@ public class MainActivity extends AppCompatActivity {
         mIsStateAlreadySaved = true;
     }
 
+    @Override
+    public void updateCheckStatus(int checkStatus) {
+        Toast.makeText(this, "Status Code "+checkStatus+" is called.", Toast.LENGTH_SHORT).show();
+    }
 }
