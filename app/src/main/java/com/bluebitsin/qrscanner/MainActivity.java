@@ -1,38 +1,87 @@
 package com.bluebitsin.qrscanner;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentManager;
-
-import android.content.DialogInterface;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
+
+import com.bluebitsin.qrscanner.model.QRScanResponse;
+import com.bluebitsin.qrscanner.utility.ApiClient;
+import com.bluebitsin.qrscanner.utility.ApiInterface;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class MainActivity extends AppCompatActivity implements PopupDialogFragment.CheckStatusListener{
 
+    private ProgressDialog progressDialog;
     private Button btnScan;
     private boolean mIsStateAlreadySaved = false;
     private boolean mPendingShowDialog = false;
-    private boolean isQRValid = true;
-    private int scanQRStatus = 2; // 1= check-in, 2 = checkout
-    private String qrScanMessage = "Car = Swift Desire, No = UP3250101";
-    //private String qrScanMessage = "QR Code might be expired or already used or wrong QR Code scanned. Please scan correct QR Code.";
+    private boolean isQRValid;
+    private int scanQRStatus; // 1= check-in, 2 = checkout
+    private String qrScanMessage;
+
+    private int bookingId;
+    private final int agentId = 906100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         btnScan = findViewById(R.id.btnScan);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Please Wait...");
         scanTicket();
 
     }
+
+    private void callQRScanData(){
+
+        ApiInterface apiService =
+                ApiClient.getClient().create(ApiInterface.class);
+
+        Call<QRScanResponse> call = apiService.getQRScanData();
+        call.enqueue(new Callback<QRScanResponse>() {
+            @Override
+            public void onResponse(Call<QRScanResponse> call, Response<QRScanResponse> response) {
+
+                progressDialog.dismiss();
+
+                if(response.body() != null){
+
+                    QRScanResponse qrResponse = response.body();
+                    Log.d(ParkingConstants.TAG_MAIN_ACTIVITY, qrResponse.toString());
+
+                    // initialize popup dialog arguments
+                    isQRValid = qrResponse.getQrData().getIsQrValid();
+                    scanQRStatus = qrResponse.getQrData().getScanQrStatus();
+                    qrScanMessage = qrResponse.getQrData().getScanStatusMessage();
+                    bookingId = qrResponse.getQrData().getBookingId();
+
+                    showPopup();
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<QRScanResponse>call, Throwable t) {
+                // Log error here since request failed
+                progressDialog.dismiss();
+                Log.e(ParkingConstants.TAG_MAIN_ACTIVITY, t.toString());
+            }
+        });
+    }
+
 
     public void scanTicket(){
 
@@ -62,11 +111,12 @@ public class MainActivity extends AppCompatActivity implements PopupDialogFragme
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
 
+                progressDialog.show();
                 // make api call to check if qr is valid
+                callQRScanData();
                 // if valid then check is qr expired or not
                 // if qr is ok show dialog with necessary details like car no, model, verified tag,
                 // show buttons check in / check out depending on status code.
-                showPopup();
                 // once check in or check out update the status code in db.
 
                 //Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();

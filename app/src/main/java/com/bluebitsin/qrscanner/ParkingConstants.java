@@ -2,6 +2,7 @@ package com.bluebitsin.qrscanner;
 
 public class ParkingConstants {
 
+    public static final String TAG_MAIN_ACTIVITY = "LOG_MAIN_ACTIVITY";
     public static final String TAG_SCAN_STATUS_DIALOG = "scan_status_dialog";
     public static final String IS_QR_VALID = "is_qr_valid";
     public static final String SCAN_QR_STATUS = "scan_qr_status";
