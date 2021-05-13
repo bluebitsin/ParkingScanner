@@ -17,6 +17,7 @@ import com.bluebitsin.qrscanner.utility.ApiInterface;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -31,7 +32,8 @@ public class MainActivity extends AppCompatActivity implements PopupDialogFragme
     private int scanQRStatus; // 1= check-in, 2 = checkout
     private String qrScanMessage;
 
-    private int bookingId;
+    private int bookingId = 1;
+    private int customerId = 3;
     private final int agentId = 906100;
 
     @Override
@@ -161,6 +163,32 @@ public class MainActivity extends AppCompatActivity implements PopupDialogFragme
 
     @Override
     public void updateCheckStatus(int checkStatus) {
-        Toast.makeText(this, "Status Code "+checkStatus+" is called.", Toast.LENGTH_SHORT).show();
+
+        long timestamp = System.currentTimeMillis();
+
+        progressDialog.show();
+        ApiInterface apiService =
+                ApiClient.getClient().create(ApiInterface.class);
+
+        Call<ResponseBody> call = apiService.updateBookingStatus(checkStatus, bookingId,
+                                                                customerId, agentId, timestamp);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                progressDialog.dismiss();
+                Toast.makeText(MainActivity.this, "Response Code: "+ response.code()
+                        , Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+                progressDialog.dismiss();
+                Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
+
 }

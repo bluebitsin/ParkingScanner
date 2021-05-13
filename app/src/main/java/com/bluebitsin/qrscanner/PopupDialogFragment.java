@@ -114,6 +114,7 @@ public class PopupDialogFragment extends DialogFragment {
                 if(chekStatusListener != null){
 
                     chekStatusListener.updateCheckStatus(ParkingConstants.CHECK_IN);
+                    dismiss();
 
                 }
             }
@@ -126,6 +127,7 @@ public class PopupDialogFragment extends DialogFragment {
                 if(chekStatusListener != null){
 
                     chekStatusListener.updateCheckStatus(ParkingConstants.CHECK_OUT);
+                    dismiss();
 
                 }
 
