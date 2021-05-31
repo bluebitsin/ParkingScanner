@@ -2,6 +2,8 @@
 package com.bluebitsin.qrscanner.model;
 
 import java.io.Serializable;
+import java.util.Date;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -22,7 +24,7 @@ public class QrData implements Serializable
     private Integer bookingId;
     @SerializedName("booking_timestamp")
     @Expose
-    private Integer bookingTimestamp;
+    private Date bookingTimestamp;
     @SerializedName("car_model")
     @Expose
     private String carModel;
@@ -48,7 +50,8 @@ public class QrData implements Serializable
      * @param bookingId
      * @param carModel
      */
-    public QrData(Boolean isQrValid, Integer scanQrStatus, String scanStatusMessage, Integer bookingId, Integer bookingTimestamp, String carModel, String carNo) {
+    public QrData(Boolean isQrValid, Integer scanQrStatus, String scanStatusMessage,
+                  Integer bookingId, Date bookingTimestamp, String carModel, String carNo) {
         super();
         this.isQrValid = isQrValid;
         this.scanQrStatus = scanQrStatus;
@@ -91,11 +94,11 @@ public class QrData implements Serializable
         this.bookingId = bookingId;
     }
 
-    public Integer getBookingTimestamp() {
+    public Date getBookingTimestamp() {
         return bookingTimestamp;
     }
 
-    public void setBookingTimestamp(Integer bookingTimestamp) {
+    public void setBookingTimestamp(Date bookingTimestamp) {
         this.bookingTimestamp = bookingTimestamp;
     }
 
@@ -137,7 +140,7 @@ public class QrData implements Serializable
         sb.append(',');
         sb.append("bookingTimestamp");
         sb.append('=');
-        sb.append(((this.bookingTimestamp == null)?"<null>":this.bookingTimestamp));
+        sb.append(((this.bookingTimestamp == null)?"<null>":this.bookingTimestamp.toString()));
         sb.append(',');
         sb.append("carModel");
         sb.append('=');

@@ -19,6 +19,8 @@ import androidx.fragment.app.FragmentTransaction;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.text.ParseException;
+
 public class PopupDialogFragment extends DialogFragment {
 
     private CheckStatusListener chekStatusListener;
@@ -28,7 +30,7 @@ public class PopupDialogFragment extends DialogFragment {
     private Button btnCheckIn, btnCheckOut, btnOk;
 
     public interface CheckStatusListener{
-        public void updateCheckStatus(int checkStatus);
+         void updateCheckStatus(int checkStatus);
     }
 
     @Override
@@ -105,7 +107,10 @@ public class PopupDialogFragment extends DialogFragment {
             btnOk.setVisibility(View.VISIBLE);
         }
 
-        textMessage.setText(args.getString(ParkingConstants.QR_STATUS_MESSAGE));
+        String message = "Vehicle Model : "+args.getString(ParkingConstants.VEHICLE_MODEL)+
+                ", \nVehicle Number : "+args.getString(ParkingConstants.VEHICLE_NUMBER)+
+                ", \nParking Book Date : "+args.getString(ParkingConstants.PARKING_BOOK_DATE);
+        textMessage.setText(message);
 
         //add click listener
         btnCheckIn.setOnClickListener(new View.OnClickListener() {
